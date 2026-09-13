@@ -58,7 +58,8 @@ function calcSplit(amount) {
 }
 
 /* البحث عن لعبة/باقة */
-function findGame(id) { return GAMES.find(g => g.id === id) || CARDS.find(c => c.id === id) || APPS.find(a => a.id === id) || null; }
+function findGame(id) { return GAMES.find(g => g.id === id) || CARDS.find(c => c.id === id) || APPS.find(a => a.id === id) || WALLETS.find(w => w.id === id) || null; }
+function isWallet(item) { return WALLETS.some(w => w.id === item.id); }
 function isCard(item) { return CARDS.some(c => c.id === item.id); }
 function isApp(item) { return APPS.some(a => a.id === item.id); }
 
@@ -67,6 +68,7 @@ const ALL_PRODUCTS = [
   ...GAMES.map(g => ({ ...g, kind: "game" })),
   ...APPS.map(a => ({ ...a, kind: "app" })),
   ...CARDS.map(c => ({ ...c, kind: "card" })),
+  ...WALLETS.map(w => ({ ...w, kind: "wallet" })),
 ];
 function findPack(game, packId) { return (game.packs || []).find(p => p.id === packId) || null; }
 
@@ -106,6 +108,7 @@ function initHome() {
       { id: "game", label: "ألعاب",           icon: "🎮" },
       { id: "app",  label: "تطبيقات ومواقع",  icon: "📱" },
       { id: "card", label: "بطاقات واشتراكات", icon: "🎁" },
+      { id: "wallet", label: "بطاقات دفع", icon: "💳" },
       { id: "hot",  label: "الأكثر طلبًا",     icon: "🔥" },
       { id: "fast", label: "تسليم فوري",      icon: "⚡" },
     ];
@@ -116,7 +119,7 @@ function initHome() {
     const matches = (p) => {
       if (activeChip === "hot" && !(p.tags || []).includes("الأكثر طلبًا")) return false;
       if (activeChip === "fast" && !(p.tags || []).includes("فوري")) return false;
-      if (["game", "app", "card"].includes(activeChip) && p.kind !== activeChip) return false;
+      if (["game", "app", "card", "wallet"].includes(activeChip) && p.kind !== activeChip) return false;
       if (query) {
         const hay = norm(p.name + " " + p.sub + " " + (p.tags || []).join(" ") + " " + (p.alias || ""));
         if (!norm(query).split(/\s+/).every((w) => hay.includes(w))) return false;
@@ -126,7 +129,7 @@ function initHome() {
 
     const render = () => {
       const list = ALL_PRODUCTS.filter(matches);
-      grid.innerHTML = list.map((p) => cardTpl(p, p.kind === "card" ? "اطلب الآن 🎁" : "اشحن الآن ⚡")).join("");
+      grid.innerHTML = list.map((p) => cardTpl(p, p.kind === "card" ? "اطلب الآن 🎁" : (p.kind === "wallet" ? "اشحن الآن 💳" : "اشحن الآن ⚡"))).join("");
       const cnt = $("catalogCount");
       if (cnt) {
         cnt.textContent = list.length
@@ -187,31 +190,10 @@ const Buy = {
   state: { game: null, pack: null, pid: "", nick: "", verified: false, pm: "card" },
 
   init() {
-    /* قراءة ?game= من الرابط — يدعم الألعاب والبطاقات */
+    /* قراءة ?game= من الرابط — ألعاب · تطبيقات · بطاقات · محافظ دفع */
     const params = new URLSearchParams(location.search);
     const gid = params.get("game");
-    if (gid === "custom") {
-      const draft = JSON.parse(sessionStorage.getItem("shdz_custom") || "null");
-      if (draft && draft.price >= SHDZ.custom.minPrice) {
-        this.state.game = {
-          id: "custom",
-          name: draft.title || "طلب مخصص",
-          emoji: "🛠️",
-          sub: draft.desc || "طلب شحن مخصص",
-          tags: ["مخصص"],
-          verifyType: "username",
-          verifyHint: "أدخل معرّف حسابك في المنصة المطلوبة",
-          packs: [{ id: "custom", name: draft.pack || draft.title || "طلب مخصص", sub: draft.desc || "", price: Math.round(draft.price), bonus: null }],
-        };
-        this.state.custom = true;
-        this.state.customDraft = draft;
-      } else {
-        location.replace("custom.html");
-        return;
-      }
-    } else {
-      this.state.game = findGame(gid) || GAMES[0];
-    }
+    this.state.game = findGame(gid) || GAMES[0];
 
     this.renderGameBox();
     this.renderPacks();
@@ -232,7 +214,7 @@ const Buy = {
         $("playerId").inputMode = "email";
         $("playerId").placeholder = "name@email.com";
       }
-      if ($("idHint")) $("idHint").textContent = "سيصلك الرمز أو تفاصيل الاشتراك على هذا البريد خلال 30 دقيقة كحد أقصى";
+      if ($("idHint")) $("idHint").textContent = isWallet(g) ? (g.verifyHint || "سيصلك الرمز أو تفاصيل الاشتراك على هذا البريد خلال 30 دقيقة كحد أقصى") : "سيصلك الرمز أو تفاصيل الاشتراك على هذا البريد خلال 30 دقيقة كحد أقصى";
     } else if (g.verifyType === "username") {
       if ($("idLabel")) $("idLabel").textContent = "اسم المستخدم / المعرّف";
       if ($("playerId")) {
@@ -340,10 +322,9 @@ const Buy = {
     if (box) { box.classList.remove("hidden", "err"); }
 
     const setType = g.verifyType;
-    /* قواعد بسيطة للتحقق الشكلي — الطلب المخصص يقبل أي معرّف من 3 أحرف فأكثر */
+    /* قواعد بسيطة للتحقق الشكلي: رقم لاعب · اسم مستخدم · بريد إلكتروني */
     let ok = false;
-    if (this.state.custom) ok = val.length >= 3;
-    else if (setType === "playerid") ok = /^\d{6,12}$/.test(val);
+    if (setType === "playerid") ok = /^\d{6,12}$/.test(val);
     else if (setType === "username") ok = /^[A-Za-z0-9_#@]{2,24}$/.test(val);
     else ok = /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(val);
 
@@ -424,16 +405,13 @@ const Buy = {
       ["تأكيد الدفع…", "بوابة SlickPay تتحقق من المعاملة (SATIM)"],
       ["تقسيم المبلغ…", `${fmtDZ(calcSplit(pack.price).store)} للمتجر / ${fmtDZ(calcSplit(pack.price).supplier)} للمورد`],
       ["إرسال الشحنة للمورد…", "يُحوَّل ثمن الطلب لمورد البطاقات تلقائياً"],
-      ["تجهيز البطاقة/الاشتراك…", `${game.name} — ${pack.name} → سيصل إلى ${maskId(pid, "email")}`],
+      [(isWallet(game) ? "شحن المحفظة الإلكترونية…" : "تجهيز البطاقة/الاشتراك…"), `${game.name} — ${pack.name} → سيصل إلى ${maskId(pid, "email")}`],
     ] : [
       ["تأكيد الدفع…", "بوابة SlickPay تتحقق من المعاملة (SATIM)"],
       ["تقسيم المبلغ…", `${fmtDZ(calcSplit(pack.price).store)} للمتجر / ${fmtDZ(calcSplit(pack.price).supplier)} للمورد`],
       ["إرسال الشحنة للمورد…", "يُحوَّل ثمن الشحن لمورد اللعبة تلقائياً"],
       ["تنفيذ الشحن داخل اللعبة…", `${game.name} — ${pack.name} → ID ${maskId(pid, game.verifyType)}`],
     ];
-    if (this.state.custom) {
-      steps[3] = ["تنفيذ الطلب المخصص…", `${game.name} — ${pack.name} → تنفيذ يدوي خلال ${SHDZ.custom.deliveryMins} دقيقة`];
-    }
     for (const [t, s] of steps) {
       if ($("procTitle")) $("procTitle").textContent = t;
       if ($("procSub")) $("procSub").textContent = s;
@@ -461,7 +439,7 @@ const Buy = {
     const email = game.verifyType === "email";
     return {
       id: genOrderId(),
-      kind: this.state.custom ? "custom" : (email ? "card" : "game"),
+      kind: email ? (isWallet(game) ? "wallet" : "card") : "game",
       game: game.id,
       gameName: game.name,
       gameEmoji: game.emoji,
@@ -490,7 +468,7 @@ const Buy = {
     set("rPack", o.pack);
     set("rPid", o.pid);
     set("rNick", o.nick);
-    if ($("rPidK")) $("rPidK").textContent = o.kind === "card" ? "البريد الإلكتروني" : (o.kind === "custom" ? "معرّف الحساب" : "معرّف اللاعب");
+    if ($("rPidK")) $("rPidK").textContent = (o.kind === "card" || o.kind === "wallet") ? "البريد الإلكتروني" : "معرّف اللاعب";
     set("rMethod", o.pmName);
     set("rAmount", fmtDZ(o.amount));
     set("rSplit", `✂️ ${fmtDZ(o.splitStore)} للمتجر | ${fmtDZ(o.splitSupplier)} للمورد`);
@@ -573,90 +551,6 @@ function downloadReceipt(o) {
 }
 
 /* ============================================================
-   صفحة الطلب المخصص (custom.html)
-   ============================================================ */
-const Custom = {
-  state: { cur: "USD", amt: 0 },
-
-  fmt(n) {
-    return new Intl.NumberFormat("fr-DZ").format(Math.round(n)) + " دج";
-  },
-
-  calc() {
-    const cur = this.state.cur;
-    const amt = Number($("customAmt") ? $("customAmt").value : 0) || 0;
-    const rate = SHDZ.custom.rates[cur] || 1;
-    const converted = amt * rate;
-    const fee = converted * SHDZ.custom.feePct;
-    const total = converted + fee;
-    this.state.amt = total;
-
-    const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
-    set("cRate", `1 ${cur} = ${rate} دج`);
-    set("cConverted", this.fmt(converted));
-    set("cFee", this.fmt(fee));
-    set("cTotal", this.fmt(total));
-
-    const box = $("customTotalBox");
-    if (box) box.classList.toggle("hidden", !(amt > 0));
-
-    const warn = $("customMinWarn");
-    if (warn) warn.classList.toggle("hidden", total >= SHDZ.custom.minPrice);
-
-    const btn = $("customGo");
-    if (btn) btn.disabled = !(amt > 0 && total >= SHDZ.custom.minPrice);
-  },
-
-  wire() {
-    const amtInput = $("customAmt");
-    if (amtInput) {
-      amtInput.addEventListener("input", () => this.calc());
-    }
-    $$(".cur-chip").forEach((b) => b.addEventListener("click", () => {
-      this.state.cur = b.dataset.cur;
-      $$(".cur-chip").forEach((x) => x.classList.toggle("active", x === b));
-      const sym = $("customCurSym");
-      if (sym) sym.textContent = b.dataset.cur === "USD" ? "$" : b.dataset.cur === "EUR" ? "€" : b.dataset.cur === "GBP" ? "£" : "";
-      this.calc();
-    }));
-    const first = document.querySelector(".cur-chip[data-cur=\"USD\"]");
-    if (first) first.classList.add("active");
-
-    const form = $("customForm");
-    if (form) form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const title = ($("customPlatform") ? $("customPlatform").value : "").trim() || "طلب مخصص";
-      const desc = ($("customDetail") ? $("customDetail").value : "").trim();
-      const pack = ($("customPack") ? $("customPack").value : "").trim() || "حزمة مخصصة";
-      const contact = ($("customContact") ? $("customContact").value : "").trim();
-      const amt = Number($("customAmt").value) || 0;
-      const cur = this.state.cur;
-
-      if (amt <= 0) { toast("أدخل المبلغ المطلوب بالعملة الأجنبية أولاً"); return; }
-      if (this.state.amt < SHDZ.custom.minPrice) { toast("الطلب أقل من الحد الأدنى — ادمجه مع طلب آخر أو زد المبلغ"); return; }
-      if (!contact) { toast("أدخل وسيلة تواصل (واتساب أو بريد) لنؤكد لك التنفيذ"); return; }
-
-      const draft = {
-        title: `شحن ${title}`,
-        platform: title,
-        desc: desc ? `${pack} — ${desc}` : pack,
-        pack,
-        contact,
-        amt, cur,
-        rate: SHDZ.custom.rates[cur] || 1,
-        price: this.state.amt,
-        createdAt: new Date().toISOString(),
-      };
-      sessionStorage.setItem("shdz_custom", JSON.stringify(draft));
-      toast("✅ تم تسعير طلبك — انتقل للدفع الآن");
-      setTimeout(() => (location.href = "buy.html?game=custom"), 700);
-    });
-
-    this.calc();
-  },
-};
-
-/* ============================================================
    صفحة التتبع (track.html)
    ============================================================ */
 const Track = {
@@ -693,9 +587,9 @@ const Track = {
     set("tGame", `${o.gameEmoji} ${o.gameName}`);
     set("tPack", o.pack);
     set("tPid", o.pid);
-    if ($("tPidK")) $("tPidK").textContent = o.kind === "card" ? "البريد الإلكتروني" : (o.kind === "custom" ? "معرّف الحساب" : "اللاعب");
+    if ($("tPidK")) $("tPidK").textContent = (o.kind === "card" || o.kind === "wallet") ? "البريد الإلكتروني" : "اللاعب";
     set("tNick", o.nick);
-    if ($("tNickK")) $("tNickK").textContent = o.kind === "card" ? "اسم البريد" : (o.kind === "custom" ? "الحساب المُتحقَّق" : "الاسم المُتحقَّق");
+    if ($("tNickK")) $("tNickK").textContent = (o.kind === "card" || o.kind === "wallet") ? "اسم البريد" : "الاسم المُتحقَّق";
     set("tAmount", fmtDZ(o.amount));
     set("tMethod", o.pmName);
     set("tStatus", "✓ مُسلَّم");
@@ -711,8 +605,8 @@ const Track = {
       ["💳", "استلام الدفع", `بوابة SlickPay — ${fmtDZ(o.amount)} عبر ${o.pmName.includes("QR") ? "QR" : "بطاقة"}`, tm(0)],
       ["✂️", "التقسيم التلقائي للأموال", `${fmtDZ(o.splitStore)} للمتجر | ${fmtDZ(o.splitSupplier)} للمورد`, tm(3)],
       ["📤", "تحويل ثمن الشحن للمورد", "عبر SlickPay — تم تمويل طلب الشحن", tm(5)],
-      ["🎮", o.kind === "card" ? "تجهيز البطاقة/الاشتراك" : (o.kind === "custom" ? "تنفيذ الطلب المخصص" : "تنفيذ الشحن في اللعبة"), o.kind === "card" ? `${o.gameName} — ${o.pack} بريد ${maskId(o.pid, "email")}` : `${o.gameName} — ${o.pack} إلى ${o.nick}`, tm(20)],
-      ["✅", o.kind === "card" ? "الإرسال إلى البريد" : "التسليم للاعب", o.kind === "card" ? `أُرسل الرمز/التفاصيل إلى ${maskId(o.pid, "email")} — خلال ${o.deliveredSecs} ثانية` : `وصل الكريدي إلى ID ${maskId(o.pid, "playerid")} — خلال ${o.deliveredSecs} ثانية`, tm(o.deliveredSecs)],
+      ["🎮", o.kind === "card" ? "تجهيز البطاقة/الاشتراك" : (o.kind === "wallet" ? "شحن المحفظة الإلكترونية" : "تنفيذ الشحن في اللعبة"), (o.kind === "card" || o.kind === "wallet") ? `${o.gameName} — ${o.pack} بريد ${maskId(o.pid, "email")}` : `${o.gameName} — ${o.pack} إلى ${o.nick}`, tm(20)],
+      ["✅", (o.kind === "card" || o.kind === "wallet") ? "الإرسال إلى البريد" : "التسليم للاعب", (o.kind === "card" || o.kind === "wallet") ? `أُرسل الرمز/التفاصيل إلى ${maskId(o.pid, "email")} — خلال ${o.deliveredSecs} ثانية` : `وصل الكريدي إلى ID ${maskId(o.pid, "playerid")} — خلال ${o.deliveredSecs} ثانية`, tm(o.deliveredSecs)],
     ];
     const list = $("tlList");
     if (list) {
@@ -794,6 +688,5 @@ document.addEventListener("DOMContentLoaded", () => {
   if (path === "index.html" || path === "") initHome();
   if (path === "buy.html") Buy.init();
   if (path === "track.html") Track.init();
-  if (path === "custom.html") Custom.wire();
   setupInstallPrompt();
 });

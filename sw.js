@@ -1,14 +1,13 @@
 /* ============================================================
    شحنك DZ — sw.js (Service Worker)
-   استراتيجية: Network-first للصفحات + Cache-first للأصول الثابتة
+   استراتيجية: Network-first للصفحات وملفات js/css (تضمن التحديث الفوري) + Cache-first للصور والـmanifest
    ============================================================ */
 
-const CACHE = "shdz-v5";
+const CACHE = "shdz-v6";
 const CORE = [
   "index.html",
   "buy.html",
   "track.html",
-  "custom.html",
   "css/styles.css",
   "js/config.js",
   "js/data.js",
@@ -60,7 +59,21 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  /* الأصول: كاش أولاً */
+  /* js/css: شبكة أولاً — تضمن وصول التحديثات فورًا (إصلاح البحث القديم) */
+  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".css")) {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copy));
+          return res;
+        })
+        .catch(() => caches.match(e.request).then((m) => m || Response.error()))
+    );
+    return;
+  }
+
+  /* بقية الأصول (صور، manifest…): كاش أولاً */
   e.respondWith(
     caches.match(e.request).then((m) => m || fetch(e.request).then((res) => {
       const copy = res.clone();

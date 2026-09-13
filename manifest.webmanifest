@@ -1,7 +1,7 @@
 {
   "name": "شحنك DZ — شحن كريدي الألعاب",
   "short_name": "شحنك DZ",
-  "description": "متجر جزائري لشحن كريدي الألعاب والتطبيقات والبطاقات — 59 منتجًا: PUBG UC، جواهرات Free Fire، تيك توك، نتفلكس، شاهد VIP وSpotify — مع طلبات مخصصة لأي موقع أو تطبيق أو لعبة غير متوفرة. دفع آمن عبر SlickPay وتسليم فوري.",
+  "description": "اشحن كريدي ألعابك في ثوانٍ: PUBG UC، Free Fire، Valorant، Roblox، Steam — بطاقات واشتراكات: Netflix، شاهد VIP، Spotify، YouTube Premium — تطبيقات: TikTok وBIGO — وبطاقات دفع إلكتروني: PayPal وPayeer وSkrill وWise وRedotPay. دفع آمن ببطاقة CIB/الذهبية عبر SlickPay، تسليم فوري للألعاب والبطاقات على بريدك خلال 30 دقيقة، مع تتبع لكل طلب.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "index.html",
@@ -10,7 +10,10 @@
   "orientation": "portrait",
   "background_color": "#f6f7fb",
   "theme_color": "#4f46e5",
-  "categories": ["shopping", "games"],
+  "categories": [
+    "shopping",
+    "games"
+  ],
   "icons": [
     {
       "src": "assets/img/icon-192.png",
