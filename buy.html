@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إتمام الشحن — شحنك DZ</title>
+<meta name="description" content="أكمل شحن الكريدي: اختيار الباقة، التحقق من معرّف اللاعب، الدفع الآمن عبر SlickPay، والتسليم الفوري.">
+<meta name="theme-color" content="#4f46e5">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+
+<body id="bodyTag">
+
+<!-- ================= NAVBAR ================= -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand" aria-label="شحنك DZ">
+      <img src="assets/img/icon-192.png" alt="شحنك DZ">
+      <span>
+        <span class="brand-name">شحنك DZ</span><br>
+        <span class="brand-sub">كريدي الألعاب · فوري · آمن</span>
+      </span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">الرئيسية</a>
+      <a href="index.html#games">الألعاب</a>
+      <a href="track.html">تتبع طلب</a>
+    </nav>
+    <a href="index.html#games" class="nav-cta">⚡ اشحن الآن</a>
+  </div>
+</header>
+
+<!-- ================= المعالج ================= -->
+<main class="buy-wrap container">
+  <div class="wizard-head">
+    <h1 id="wTitle">إتمام الشحن</h1>
+    <p id="wSub">خطوات قليلة والكريدي في حسابك</p>
+  </div>
+
+  <!-- شريط التقدم -->
+  <div class="progress-track" id="progressTrack">
+    <div class="p-step active" data-step="1"><div class="p-dot">١</div><div class="p-label">الباقة</div></div>
+    <div class="p-step" data-step="2"><div class="p-dot">٢</div><div class="p-label">اللاعب</div></div>
+    <div class="p-step" data-step="3"><div class="p-dot">٣</div><div class="p-label">الدفع</div></div>
+    <div class="p-step" data-step="4"><div class="p-dot">٤</div><div class="p-label">التسليم</div></div>
+  </div>
+
+  <div class="wiz-card">
+
+    <!-- ===== الخطوة 1: الباقة ===== -->
+    <section class="wiz-step active" data-step="1">
+      <div class="field" style="margin-bottom:1rem">
+        <label>اللعبة المختارة</label>
+        <div class="verify-box" id="gameBox" style="margin:0">
+          <span class="v-ico" id="selGameEmoji">🎯</span>
+          <div>
+            <div class="v-name" id="selGameName" style="color:var(--primary)">PUBG Mobile</div>
+            <div class="v-sub" id="selGameSub" style="color:var(--primary-deep)">شدّة UC بلا حدود</div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>اختر الباقة</label>
+        <div class="packs" id="packsList"></div>
+      </div>
+      <div class="wiz-nav">
+        <a href="index.html#games" class="btn btn-outline">↩ تغيير اللعبة</a>
+        <button class="btn btn-primary" id="toStep2" disabled>التالي ←</button>
+      </div>
+    </section>
+
+    <!-- ===== الخطوة 2: التحقق من اللاعب ===== -->
+    <section class="wiz-step" data-step="2">
+      <div class="field">
+        <label id="idLabel">معرّف اللاعب</label>
+        <input class="input ltr" id="playerId" type="text" inputmode="numeric"
+               placeholder="مثال: 5214889012" style="direction:ltr; text-align:center; letter-spacing:.05em">
+        <p class="hint" id="idHint">تجده أسفل صورك الشخصية في اللعبة</p>
+        <div class="verify-box hidden" id="verifyBox">
+          <span class="v-ico" id="vIco">⏳</span>
+          <div>
+            <div class="v-name" id="vName">جارٍ التحقق…</div>
+            <div class="v-sub" id="vSub">نتصل بسيرفر اللعبة للتأكد من الحساب</div>
+          </div>
+        </div>
+      </div>
+      <div class="summary" id="sum2"></div>
+      <div class="split-note">
+        <span class="s-ico">✂️</span>
+        <span>ملاحظة شفافية: عند الدفع يقسم المبلغ تلقائياً عبر SlickPay — هامش المتجر يصل حسابنا وتكلفة الشحن تصل المورد مباشرة، ثم يشحن فوراً.</span>
+      </div>
+      <div class="wiz-nav">
+        <button class="btn btn-outline" id="back1">→ رجوع</button>
+        <button class="btn btn-primary" id="toStep3" disabled>التالي ←</button>
+      </div>
+    </section>
+
+    <!-- ===== الخطوة 3: الدفع ===== -->
+    <section class="wiz-step" data-step="3">
+      <div class="pay-methods">
+        <div class="pay-m selected" data-pm="card">
+          <span class="pm-ico">💳</span>
+          <div class="pm-info">
+            <div class="pm-name">بطاقة CIB / الذهبية</div>
+            <div class="pm-sub">دفع آمن عبر بوابة SlickPay · SATIM</div>
+          </div>
+        </div>
+        <div class="pay-m" data-pm="qr">
+          <span class="pm-ico">📱</span>
+          <div class="pm-info">
+            <div class="pm-name">QR عبر تطبيق SlickPay</div>
+            <div class="pm-sub">امسح الرمز من تطبيق الهاتف وادفع بثوانٍ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-form" id="cardForm">
+        <div class="field">
+          <label>رقم البطاقة</label>
+          <input class="input" id="cardNum" type="text" inputmode="numeric" maxlength="19"
+                 placeholder="•••• •••• •••• ••••" style="direction:ltr; text-align:center">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>تاريخ الانتهاء</label>
+            <input class="input" id="cardExp" type="text" maxlength="5" placeholder="MM/YY" style="direction:ltr; text-align:center">
+          </div>
+          <div class="field">
+            <label>CVV</label>
+            <input class="input" id="cardCvv" type="password" maxlength="3" placeholder="•••" style="direction:ltr; text-align:center">
+          </div>
+        </div>
+      </div>
+
+      <div id="qrForm" class="card-form hidden" style="text-align:center">
+        <div style="font-size:5rem; line-height:1; margin:.4rem 0">▣</div>
+        <p class="hint" style="text-align:center">افتح تطبيق SlickPay ← مسح QR ← وجّه الكاميرا</p>
+      </div>
+
+      <div class="summary" id="sum3"></div>
+      <div class="split-note">
+        <span class="s-ico">🔐</span>
+        <span>بيانات بطاقتك تُدخل في بوابة الدفع الرسمية فقط — لا تمر عبر موقعنا ولا نخزنها.</span>
+      </div>
+      <div class="wiz-nav">
+        <button class="btn btn-outline" id="back2">→ رجوع</button>
+        <button class="btn btn-primary" id="payBtn">🔒 دفع <span id="payAmount"></span></button>
+      </div>
+    </section>
+
+    <!-- ===== الخطوة 4: المعالجة والتسليم ===== -->
+    <section class="wiz-step" data-step="4">
+      <div id="processingBox" class="processing">
+        <div class="spinner"></div>
+        <h3 id="procTitle">جارٍ تأكيد الدفع…</h3>
+        <p id="procSub">بوابة SlickPay تتحقق من المعاملة</p>
+      </div>
+
+      <div id="successBox" class="hidden">
+        <div class="success-ico">✅</div>
+        <h3 style="text-align:center; font-weight:900; font-size:1.3rem; margin-bottom:.3rem">تم الشحن بنجاح!</h3>
+        <p style="text-align:center; color:var(--ink-2); font-size:.92rem" id="successSub">
+          وصلت الشحنة إلى حسابك — أعد فتح اللعبة إن لم تظهر فوراً.
+        </p>
+        <div class="receipt">
+          <div class="receipt-head">
+            <span class="r-id" id="rOrderId">SHDZ-XXXXXX</span>
+            <span class="r-badge">✓ مُسلَّم</span>
+          </div>
+          <div class="receipt-body">
+            <div class="r-row"><span class="k">اللعبة</span><span class="v" id="rGame">—</span></div>
+            <div class="r-row"><span class="k">الباقة</span><span class="v" id="rPack">—</span></div>
+            <div class="r-row"><span class="k">معرّف اللاعب</span><span class="v ltr" id="rPid">—</span></div>
+            <div class="r-row"><span class="k">اسم الحساب</span><span class="v" id="rNick">—</span></div>
+            <div class="r-row"><span class="k">طريقة الدفع</span><span class="v" id="rMethod">—</span></div>
+            <div class="r-row"><span class="k">المبلغ</span><span class="v" id="rAmount">—</span></div>
+            <div class="r-row"><span class="k">التقسيم التلقائي</span><span class="v ok" id="rSplit">—</span></div>
+            <div class="r-row"><span class="k">الحالة</span><span class="v ok">✓ مُسلَّم</span></div>
+          </div>
+        </div>
+        <div class="wiz-nav">
+          <button class="btn btn-outline" id="printReceipt">🧾 تحميل الإيصال</button>
+          <a href="track.html" class="btn btn-primary" id="trackBtn">📦 تتبع الطلب</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"><div class="t-msg" id="toastMsg"></div></div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

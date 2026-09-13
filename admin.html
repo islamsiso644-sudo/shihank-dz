@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المالك — شحنك DZ</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1e1b4b">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/img/favicon-32.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+
+<body id="bodyTag">
+
+<!-- ================= NAVBAR ================= -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand" aria-label="شحنك DZ">
+      <img src="assets/img/icon-192.png" alt="شحنك DZ">
+      <span>
+        <span class="brand-name">شحنك DZ</span><br>
+        <span class="brand-sub">لوحة التحكم · خاص</span>
+      </span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">الموقع</a>
+      <a href="buy.html">الشراء</a>
+      <a href="track.html">تتبع طلب</a>
+    </nav>
+    <a href="index.html" class="nav-cta">⚡ المتجر</a>
+  </div>
+</header>
+
+<!-- ================= PIN GATE ================= -->
+<section class="admin-login" id="loginBox">
+  <img src="assets/img/icon-192.png" alt="شحنك DZ">
+  <h1>🔐 لوحة المالك</h1>
+  <p>هذه الصفحة خاصة بالمسؤول. أدخل رمز PIN للمتابعة.</p>
+  <form id="pinForm">
+    <input id="pinInput" class="input mono" type="password" inputmode="numeric" maxlength="6"
+           placeholder="••••" autocomplete="off" aria-label="رمز PIN"
+           style="text-align:center; letter-spacing:.5em; font-size:1.25rem">
+    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem">دخول ←</button>
+  </form>
+  <p class="pin-err" id="pinErr" hidden>❌ رمز غير صحيح — حاول مرة أخرى</p>
+  <p style="font-size:.75rem; color:var(--ink-3); font-weight:600; margin-top:1.4rem">
+    الرمز السري يعرفه مالك المتجر فقط.
+  </p>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<main class="admin-wrap" id="dashBox" hidden>
+
+  <div class="admin-head">
+    <div>
+      <h1>📊 لوحة التحكم</h1>
+      <p style="color:var(--ink-2); font-size:.9rem; margin-top:.2rem">
+        نظرة على الطلبات، هامش المتجر (25%)، ومحفظة المورد.
+      </p>
+    </div>
+    <button class="btn btn-outline" id="logoutBtn">خروج</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid">
+    <div class="stat">
+      <div class="st-label">🧾 إجمالي الطلبات</div>
+      <div class="st-value primary" id="stOrders">0</div>
+      <div class="st-sub">على هذا الجهاز</div>
+    </div>
+    <div class="stat">
+      <div class="st-label">⏳ قيد التنفيذ</div>
+      <div class="st-value accent" id="stPending">0</div>
+      <div class="st-sub">تحتاج متابعة</div>
+    </div>
+    <div class="stat">
+      <div class="st-label">💰 حجم المبيعات</div>
+      <div class="st-value" id="stVolume">0 دج</div>
+      <div class="st-sub">إجمالي المدفوع</div>
+    </div>
+    <div class="stat">
+      <div class="st-label">🏦 هامش المتجر (25%)</div>
+      <div class="st-value gold" id="stProfit">0 دج</div>
+      <div class="st-sub">حصة حسابك عبر SlickPay</div>
+    </div>
+  </div>
+
+  <!-- Low balance alert -->
+  <div class="alert urgent hidden" id="lowBalBox">
+    <span>⚠️</span>
+    <span><b>رصيد محفظة المورد منخفض!</b> أعد شحن المحفظة من أرباحك حتى لا تتوقف التسليمات التلقائية.</span>
+  </div>
+
+  <!-- Wallet -->
+  <div class="wallet-box">
+    <div>
+      <div class="w-label">👛 محفظة المورد — الرصيد المتاح لتمويل الشحنات</div>
+      <div class="w-value" id="wBalance">25,000 دج</div>
+      <div class="w-sub" id="wThreshold">عتبة التنبيه: 3,000 دج</div>
+    </div>
+    <div style="text-align:center">
+      <div class="w-label">صافي حركة المحفظة</div>
+      <div class="w-value" id="wFlow" style="font-size:1.3rem">0 دج</div>
+      <div class="w-sub">ناقص تكاليف الشحن المنفَّذة</div>
+    </div>
+    <span class="w-mode-pill" id="wMode">وضع التجربة SIMULATION</span>
+  </div>
+
+  <!-- Orders -->
+  <div class="orders-card">
+    <div class="oc-head">
+      <h2>📋 سجل الطلبات</h2>
+      <div class="flex" style="gap:.6rem">
+        <a href="buy.html" class="btn btn-outline btn-tiny">+ طلب تجريبي</a>
+        <button class="btn btn-outline btn-tiny" id="clearOrders">🗑 مسح السجل</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>اللعبة / الباقة</th>
+            <th>اللاعب</th>
+            <th>المبلغ</th>
+            <th>التقسيم (متجر / مورد)</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+    <p id="emptyNote" class="hidden" style="padding:1.4rem; text-align:center; color:var(--ink-3); font-weight:700; font-size:.88rem">
+      لا توجد طلبات بعد على هذا الجهاز — جرّب شراءً من <a href="buy.html">صفحة الشراء</a> ثم عد هنا.
+    </p>
+  </div>
+
+  <!-- Mode note -->
+  <div class="alert" style="margin-top:1.4rem">
+    <span>🧪</span>
+    <span><b>وضع المحاكاة مفعّل (SIMULATION).</b>
+    الأرقام أعلاه تجربة كاملة للدفع والتقسيم دون مال حقيقي. للانتقال للدفع الحقيقي عبر SlickPay (معرّف التاجر <b class="mono">260913767712</b>) يلزم سيرفر خلفي يحمل مفاتيح API — لا تُوضع المفاتيح في كود المتصفح أبداً.</span>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"><div class="t-msg" id="toastMsg"></div></div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

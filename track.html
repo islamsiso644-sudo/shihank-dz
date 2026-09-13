@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تتبع طلبك — شحنك DZ</title>
+<meta name="description" content="تتبع طلب شحن الكريدي الخاص بك خطوة بخطوة: الدفع، التقسيم التلقائي للأموال، التنفيذ، والتسليم للاعب.">
+<meta name="theme-color" content="#4f46e5">
+<link rel="canonical" href="https://islamsiso644-sudo.github.io/shihank-dz/track.html">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" sizes="48x48" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+
+<body id="bodyTag">
+
+<!-- ================= NAVBAR ================= -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand" aria-label="شحنك DZ">
+      <img src="assets/img/icon-192.png" alt="شحنك DZ">
+      <span>
+        <span class="brand-name">شحنك DZ</span><br>
+        <span class="brand-sub">كريدي الألعاب · فوري · آمن</span>
+      </span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">الرئيسية</a>
+      <a href="index.html#games">الألعاب</a>
+      <a href="track.html" class="active">تتبع طلب</a>
+      <a href="index.html#faq">الأسئلة الشائعة</a>
+    </nav>
+    <a href="index.html#games" class="nav-cta">⚡ اشحن الآن</a>
+  </div>
+</header>
+
+<!-- ================= TRACK ================= -->
+<section class="track-wrap">
+  <div class="container">
+
+    <div class="wizard-head">
+      <h1>📦 تتبع الطلب</h1>
+      <p>أدخل رقم الطلب من إيصالك (يبدأ بـ <b>SHDZ-</b>) وشاهد كل خطوة — من الدفع حتى وصول الكريدي إلى حسابك في اللعبة.</p>
+    </div>
+
+    <!-- Form -->
+    <form id="trackForm" class="track-form" autocomplete="off">
+      <input id="trackInput" class="input" type="text" inputmode="latin"
+             placeholder="SHDZ-XXXXXX-XXXXX" spellcheck="false" aria-label="رقم الطلب">
+      <button type="submit" class="btn btn-primary" id="trackSubmitBtn">🔍 تتبع</button>
+    </form>
+    <p class="track-hint">💡 رقم الطلب يظهر في إيصال الشراء. مثال: <b class="mono">SHDZ-250213-8F3KQ</b></p>
+
+    <!-- Not found -->
+    <div class="alert" id="notFoundBox" hidden style="margin-top:1.4rem">
+      <span>🤔</span>
+      <span>لم نجد هذا الطلب على هذا الجهاز. تأكد من كتابة الرقم بحروفه الكبيرة كما في الإيصال، أو تواصل معنا عبر واتساب مع صورة الإيصال.</span>
+    </div>
+
+    <!-- Order ticket + timeline -->
+    <div id="orderBox" hidden style="margin-top:1.8rem">
+
+      <div class="ticket" style="transform:none">
+        <span class="ticket-notch right"></span>
+        <span class="ticket-notch left"></span>
+        <div class="ticket-head">
+          <span class="t-label">إيصال طلب</span>
+          <span class="t-num" id="tOrderId">SHDZ-…</span>
+        </div>
+        <div class="ticket-body">
+          <div class="ticket-row"><span class="k">اللعبة</span><span class="v" id="tGame">—</span></div>
+          <div class="ticket-row"><span class="k">الباقة</span><span class="v" id="tPack">—</span></div>
+          <div class="ticket-row"><span class="k">اللاعب</span><span class="v accent" id="tPid">—</span></div>
+          <div class="ticket-row"><span class="k">الاسم المُتحقَّق</span><span class="v" id="tNick">—</span></div>
+          <div class="ticket-row"><span class="k">المبلغ</span><span class="v" id="tAmount">—</span></div>
+          <div class="ticket-row"><span class="k">طريقة الدفع</span><span class="v" id="tMethod">—</span></div>
+          <div class="ticket-perf"></div>
+          <div class="ticket-row"><span class="k">الحالة</span><span class="v" id="tStatus">—</span></div>
+          <div class="ticket-row"><span class="k">زمن التسليم</span><span class="v accent" id="tTime">—</span></div>
+        </div>
+      </div>
+
+      <h3 class="tl-heading">🧭 مسار الشحنة</h3>
+      <ol class="timeline" id="tlList"></ol>
+
+      <div class="wiz-nav" style="max-width:26rem">
+        <a class="btn btn-primary" href="index.html#games">⚡ اشحن مرة أخرى</a>
+        <a class="btn btn-outline" href="index.html">الرئيسية</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <a href="index.html" class="brand">
+          <img src="assets/img/icon-192.png" alt="شحنك DZ">
+          <span>
+            <span class="brand-name">شحنك DZ</span><br>
+            <span class="brand-sub">كريدي الألعاب · فوري · آمن</span>
+          </span>
+        </a>
+        <p style="margin-top:1rem; font-size:.85rem; max-width:20rem">
+          متجر جزائري لشحن كريدي الألعاب بتسليم تلقائي ودفع آمن عبر SlickPay.
+          لا نطلب كلمة سر أي لعبة أبداً.
+        </p>
+      </div>
+      <div>
+        <h4>تنقل</h4>
+        <div class="footer-links">
+          <a href="index.html">الرئيسية</a>
+          <a href="index.html#games">الألعاب</a>
+          <a href="track.html">تتبع طلب</a>
+          <a href="index.html#faq">الأسئلة الشائعة</a>
+        </div>
+      </div>
+      <div>
+        <h4>تواصل</h4>
+        <div class="footer-links">
+          <a id="waLink" href="#" target="_blank" rel="noopener">واتساب الدعم</a>
+          <a href="#" id="phoneLink">📞 <span id="phoneTxt">0550 12 34 56</span></a>
+          <p style="font-size:.8rem; margin-top:.4rem" id="hoursTxt">من 9 صباحاً إلى 10 مساءً</p>
+        </div>
+      </div>
+      <div>
+        <h4>الدفع الآمن</h4>
+        <div class="pay-badges">
+          <span>SlickPay</span><span>SATIM</span><span>CIB</span><span>الذهبية</span>
+        </div>
+        <p style="font-size:.78rem; margin-top:.6rem; opacity:.7">
+          © 2025 شحنك DZ — كل الحقوق محفوظة.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"><div class="t-msg" id="toastMsg"></div></div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
