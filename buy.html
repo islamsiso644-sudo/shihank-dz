@@ -31,6 +31,7 @@
     <nav class="nav-links">
       <a href="index.html">الرئيسية</a>
       <a href="index.html#games">الألعاب</a>
+      <a href="index.html#cards">بطاقات واشتراكات</a>
       <a href="track.html">تتبع طلب</a>
     </nav>
     <a href="index.html#games" class="nav-cta">⚡ اشحن الآن</a>
@@ -71,7 +72,7 @@
         <div class="packs" id="packsList"></div>
       </div>
       <div class="wiz-nav">
-        <a href="index.html#games" class="btn btn-outline">↩ تغيير اللعبة</a>
+        <a href="index.html#games" class="btn btn-outline" id="step1Back">↩ تغيير الاختيار</a>
         <button class="btn btn-primary" id="toStep2" disabled>التالي ←</button>
       </div>
     </section>
@@ -177,8 +178,8 @@
           <div class="receipt-body">
             <div class="r-row"><span class="k">اللعبة</span><span class="v" id="rGame">—</span></div>
             <div class="r-row"><span class="k">الباقة</span><span class="v" id="rPack">—</span></div>
-            <div class="r-row"><span class="k">معرّف اللاعب</span><span class="v ltr" id="rPid">—</span></div>
-            <div class="r-row"><span class="k">اسم الحساب</span><span class="v" id="rNick">—</span></div>
+            <div class="r-row"><span class="k" id="rPidK">معرّف اللاعب</span><span class="v ltr" id="rPid">—</span></div>
+            <div class="r-row"><span class="k" id="rNickK">اسم الحساب</span><span class="v" id="rNick">—</span></div>
             <div class="r-row"><span class="k">طريقة الدفع</span><span class="v" id="rMethod">—</span></div>
             <div class="r-row"><span class="k">المبلغ</span><span class="v" id="rAmount">—</span></div>
             <div class="r-row"><span class="k">التقسيم التلقائي</span><span class="v ok" id="rSplit">—</span></div>

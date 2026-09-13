@@ -58,7 +58,8 @@ function calcSplit(amount) {
 }
 
 /* البحث عن لعبة/باقة */
-function findGame(id) { return GAMES.find(g => g.id === id) || null; }
+function findGame(id) { return GAMES.find(g => g.id === id) || CARDS.find(c => c.id === id) || null; }
+function isCard(item) { return CARDS.some(c => c.id === item.id); }
 function findPack(game, packId) { return (game.packs || []).find(p => p.id === packId) || null; }
 
 /* حجب كلمة السر لواجهة اللعبة (محاكاة) */
@@ -76,10 +77,7 @@ function maskId(v, type) {
    الصفحة الرئيسية (index.html)
    ============================================================ */
 function initHome() {
-  /* شبكة الألعاب */
-  const grid = $("gamesGrid");
-  if (grid) {
-    grid.innerHTML = GAMES.map(g => `
+  const cardTpl = (g, cta) => `
       <article class="game-card">
         <div class="game-top">
           <span class="game-emoji">${g.emoji}</span>
@@ -88,10 +86,17 @@ function initHome() {
         <h3>${g.name}</h3>
         <p class="g-sub">${g.sub}</p>
         <p class="g-price">من <b>${Math.min(...g.packs.map(p => p.price)).toLocaleString("fr-DZ")}</b> <span class="cur">دج</span></p>
-        <a class="btn btn-small" href="buy.html?game=${g.id}">اشحن الآن ⚡</a>
+        <a class="btn btn-small" href="buy.html?game=${g.id}">${cta}</a>
       </article>
-    `).join("");
-  }
+    `;
+
+  /* شبكة الألعاب */
+  const grid = $("gamesGrid");
+  if (grid) grid.innerHTML = GAMES.map(g => cardTpl(g, "اشحن الآن ⚡")).join("");
+
+  /* شبكة البطاقات والاشتراكات */
+  const cgrid = $("cardsGrid");
+  if (cgrid) cgrid.innerHTML = CARDS.map(c => cardTpl(c, "اطلب الآن 🎁")).join("");
 
   /* FAQ */
   const faq = $("faqList");
@@ -116,7 +121,7 @@ const Buy = {
   state: { game: null, pack: null, pid: "", nick: "", verified: false, pm: "card" },
 
   init() {
-    /* قراءة ?game= من الرابط */
+    /* قراءة ?game= من الرابط — يدعم الألعاب والبطاقات */
     const params = new URLSearchParams(location.search);
     const gid = params.get("game");
     this.state.game = findGame(gid) || GAMES[0];
@@ -132,6 +137,33 @@ const Buy = {
     if ($("selGameEmoji")) $("selGameEmoji").textContent = g.emoji;
     if ($("selGameName")) $("selGameName").textContent = g.name;
     if ($("selGameSub")) $("selGameSub").textContent = g.sub;
+    /* تكييف الخطوة 2 حسب نوع المنتج: لعبة / بطاقة / اشتراك */
+    if (g.verifyType === "email") {
+      if ($("idLabel")) $("idLabel").textContent = "بريدك الإلكتروني";
+      if ($("playerId")) {
+        $("playerId").type = "email";
+        $("playerId").inputMode = "email";
+        $("playerId").placeholder = "name@email.com";
+      }
+      if ($("idHint")) $("idHint").textContent = "سيصلك الرمز أو تفاصيل الاشتراك على هذا البريد خلال 30 دقيقة كحد أقصى";
+    } else if (g.verifyType === "username") {
+      if ($("idLabel")) $("idLabel").textContent = "اسم المستخدم / المعرّف";
+      if ($("playerId")) {
+        $("playerId").type = "text";
+        $("playerId").inputMode = "text";
+        $("playerId").placeholder = "مثال: SniperDZ";
+      }
+      if ($("idHint")) $("idHint").textContent = g.verifyHint || "أدخل اسم المستخدم الظاهر في حسابك";
+    } else {
+      if ($("idLabel")) $("idLabel").textContent = "معرّف اللاعب (Player ID)";
+      if ($("playerId")) {
+        $("playerId").type = "text";
+        $("playerId").inputMode = "numeric";
+        $("playerId").placeholder = "مثال: 5214889012";
+      }
+      if ($("idHint")) $("idHint").textContent = g.verifyHint || "تجده أسفل صورك الشخصية في اللعبة";
+    }
+    if ($("playerId")) $("playerId").classList.toggle("ltr", g.verifyType === "playerid");
   },
 
   renderPacks() {
@@ -224,7 +256,7 @@ const Buy = {
     /* قواعد بسيطة للتحقق الشكلي */
     let ok = false;
     if (setType === "playerid") ok = /^\d{6,12}$/.test(val);
-    else if (setType === "username") ok = /^[A-Za-z0-9_]{3,20}$/.test(val);
+    else if (setType === "username") ok = /^[A-Za-z0-9_#]{3,20}$/.test(val);
     else ok = /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(val);
 
     if (!ok) {
@@ -234,7 +266,7 @@ const Buy = {
         box.classList.remove("hidden");
         $("vIco").textContent = "✖";
         $("vName").textContent = "الصيغة غير صحيحة";
-        $("vSub").textContent = "تأكد من كتابة المعرف كما هو في اللعبة";
+        $("vSub").textContent = setType === "email" ? "أدخل بريداً صحيحاً بصيغة name@email.com — سيصلك عليه الرمز" : "تأكد من كتابة المعرّف كما هو في اللعبة";
       }
       return;
     }
@@ -245,23 +277,23 @@ const Buy = {
     if (box) {
       box.classList.remove("hidden", "err");
       $("vIco").textContent = "⏳";
-      $("vName").textContent = "جارٍ التحقق من الحساب…";
-      $("vSub").textContent = "نتصل بسيرفر اللعبة للتأكد من الحساب";
+      $("vName").textContent = (setType === "email" ? "جارٍ تسجيل بريدك للإرسال…" : "جارٍ التحقق من الحساب…");
+      $("vSub").textContent = (setType === "email" ? "سجلنا بريدك — الرمز سيصل عليه بعد الدفع" : "نتصل بسيرفر اللعبة للتأكد من الحساب");
     }
     await new Promise(r => setTimeout(r, 1100));
 
     /* الاسم الوهمي — ثابت لنفس الإدخال (يبدو حقيقي) */
     let h = 0;
     for (const ch of val) h = (h * 31 + ch.charCodeAt(0)) % 997;
-    const nick = FAKE_NAMES[h % FAKE_NAMES.length];
+    const nick = setType === "email" ? val.split("@")[0] : FAKE_NAMES[h % FAKE_NAMES.length];
     this.state.pid = val;
     this.state.nick = nick;
     this.state.verified = true;
 
     if (box) {
       $("vIco").textContent = "✓";
-      $("vName").textContent = "تم التحقق: " + nick;
-      $("vSub").textContent = `الحساب موجود في ${g.name} — جاهز للشحن`;
+      $("vName").textContent = (setType === "email" ? "بريد صحيح: " + nick : "تم التحقق: " + nick);
+      $("vSub").textContent = (setType === "email" ? `سيصلك ${g.name} على ${maskId(val, "email")} بعد الدفع` : `الحساب موجود في ${g.name} — جاهز للشحن`);
     }
     if (btn) btn.disabled = false;
   },
@@ -298,8 +330,14 @@ const Buy = {
 
     this.toStep(4);
 
-    /* المراحل الخمس */
-    const steps = [
+    /* المراحل الخمس — حسب نوع المنتج */
+    const email = this.state.game.verifyType === "email";
+    const steps = email ? [
+      ["تأكيد الدفع…", "بوابة SlickPay تتحقق من المعاملة (SATIM)"],
+      ["تقسيم المبلغ…", `${fmtDZ(calcSplit(pack.price).store)} للمتجر / ${fmtDZ(calcSplit(pack.price).supplier)} للمورد`],
+      ["إرسال الشحنة للمورد…", "يُحوَّل ثمن الطلب لمورد البطاقات تلقائياً"],
+      ["تجهيز البطاقة/الاشتراك…", `${game.name} — ${pack.name} → سيصل إلى ${maskId(pid, "email")}`],
+    ] : [
       ["تأكيد الدفع…", "بوابة SlickPay تتحقق من المعاملة (SATIM)"],
       ["تقسيم المبلغ…", `${fmtDZ(calcSplit(pack.price).store)} للمتجر / ${fmtDZ(calcSplit(pack.price).supplier)} للمورد`],
       ["إرسال الشحنة للمورد…", "يُحوَّل ثمن الشحن لمورد اللعبة تلقائياً"],
@@ -329,8 +367,10 @@ const Buy = {
     const split = calcSplit(pack.price);
     const now = new Date();
     const secs = 37 + Math.floor(Math.random() * 60);
+    const email = game.verifyType === "email";
     return {
       id: genOrderId(),
+      kind: email ? "card" : "game",
       game: game.id,
       gameName: game.name,
       gameEmoji: game.emoji,
@@ -346,6 +386,9 @@ const Buy = {
       status: "done",
       createdAt: now.toISOString(),
       deliveredSecs: secs,
+      deliveryNote: email
+        ? `وصل ${pack.name} من ${game.name} — أرسلنا التفاصيل/الرمز إلى ${maskId(pid, "email")} خلال ${secs} ثانية (محاكاة: الفعلي حتى 30 دقيقة).`
+        : null,
     };
   },
 
@@ -356,12 +399,13 @@ const Buy = {
     set("rPack", o.pack);
     set("rPid", o.pid);
     set("rNick", o.nick);
+    if ($("rPidK")) $("rPidK").textContent = o.kind === "card" ? "البريد الإلكتروني" : "معرّف اللاعب";
     set("rMethod", o.pmName);
     set("rAmount", fmtDZ(o.amount));
     set("rSplit", `✂️ ${fmtDZ(o.splitStore)} للمتجر | ${fmtDZ(o.splitSupplier)} للمورد`);
     if ($("successSub")) {
       $("successSub").textContent =
-        `وصل ${o.pack} من ${o.gameName} إلى حساب ${o.nick} (${maskId(o.pid, "playerid")}) خلال ${o.deliveredSecs} ثانية.`;
+        (o.deliveryNote || `وصل ${o.pack} من ${o.gameName} إلى حساب ${o.nick} (${maskId(o.pid, "playerid")}) خلال ${o.deliveredSecs} ثانية.`);
     }
     const tb = $("trackBtn");
     if (tb) tb.href = `track.html?id=${encodeURIComponent(o.id)}`;
@@ -401,8 +445,8 @@ function downloadReceipt(o) {
     ["رقم الطلب", o.id],
     ["اللعبة", o.gameName],
     ["الباقة", o.pack],
-    ["اللاعب (ID)", o.pid],
-    ["الاسم المُتحقَّق", o.nick],
+    [o.kind === "card" ? "البريد الإلكتروني" : "اللاعب (ID)", o.pid],
+    [o.kind === "card" ? "اسم البريد" : "الاسم المُتحقَّق", o.nick],
     ["طريقة الدفع", o.pmName],
     ["المبلغ", fmtDZ(o.amount)],
     ["التقسيم التلقائي", `${fmtDZ(o.splitStore)} متجر | ${fmtDZ(o.splitSupplier)} مورد`],
@@ -474,7 +518,9 @@ const Track = {
     set("tGame", `${o.gameEmoji} ${o.gameName}`);
     set("tPack", o.pack);
     set("tPid", o.pid);
+    if ($("tPidK")) $("tPidK").textContent = o.kind === "card" ? "البريد الإلكتروني" : "اللاعب";
     set("tNick", o.nick);
+    if ($("tNickK")) $("tNickK").textContent = o.kind === "card" ? "اسم البريد" : "الاسم المُتحقَّق";
     set("tAmount", fmtDZ(o.amount));
     set("tMethod", o.pmName);
     set("tStatus", "✓ مُسلَّم");
@@ -490,8 +536,8 @@ const Track = {
       ["💳", "استلام الدفع", `بوابة SlickPay — ${fmtDZ(o.amount)} عبر ${o.pmName.includes("QR") ? "QR" : "بطاقة"}`, tm(0)],
       ["✂️", "التقسيم التلقائي للأموال", `${fmtDZ(o.splitStore)} للمتجر | ${fmtDZ(o.splitSupplier)} للمورد`, tm(3)],
       ["📤", "تحويل ثمن الشحن للمورد", "عبر SlickPay — تم تمويل طلب الشحن", tm(5)],
-      ["🎮", "تنفيذ الشحن في اللعبة", `${o.gameName} — ${o.pack} إلى ${o.nick}`, tm(20)],
-      ["✅", "التسليم للاعب", `وصل الكريدي إلى ID ${maskId(o.pid, "playerid")} — خلال ${o.deliveredSecs} ثانية`, tm(o.deliveredSecs)],
+      ["🎮", o.kind === "card" ? "تجهيز البطاقة/الاشتراك" : "تنفيذ الشحن في اللعبة", o.kind === "card" ? `${o.gameName} — ${o.pack} بريد ${maskId(o.pid, "email")}` : `${o.gameName} — ${o.pack} إلى ${o.nick}`, tm(20)],
+      ["✅", o.kind === "card" ? "الإرسال إلى البريد" : "التسليم للاعب", o.kind === "card" ? `أُرسل الرمز/التفاصيل إلى ${maskId(o.pid, "email")} — خلال ${o.deliveredSecs} ثانية` : `وصل الكريدي إلى ID ${maskId(o.pid, "playerid")} — خلال ${o.deliveredSecs} ثانية`, tm(o.deliveredSecs)],
     ];
     const list = $("tlList");
     if (list) {
