@@ -87,7 +87,7 @@ function initHome() {
         </div>
         <h3>${g.name}</h3>
         <p class="g-sub">${g.sub}</p>
-        <p class="g-price">من <b>${fmtDZ(Math.min(...g.packs.map(p => p.price)))}</b> <span class="cur">دج</span></p>
+        <p class="g-price">من <b>${Math.min(...g.packs.map(p => p.price)).toLocaleString("fr-DZ")}</b> <span class="cur">دج</span></p>
         <a class="btn btn-small" href="buy.html?game=${g.id}">اشحن الآن ⚡</a>
       </article>
     `).join("");
