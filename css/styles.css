@@ -764,3 +764,296 @@ td .ltr { direction: ltr; }
   padding: .35rem .9rem; border-radius: var(--r-pill);
   white-space: nowrap;
 }
+
+/* ============================================================
+   v5 — الكتالوج الموحد + الطلب المخصص
+   ============================================================ */
+
+/* ---------- أدوات الكتالوج: بحث + شرائح ---------- */
+.catalog-tools {
+  max-width: 50rem;
+  margin: 0 auto 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  align-items: center;
+}
+.search-box {
+  position: relative;
+  width: 100%;
+}
+.search-box svg {
+  position: absolute;
+  top: 50%;
+  right: 1.1rem;
+  transform: translateY(-50%);
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.search-box input {
+  width: 100%;
+  padding: .95rem 3.2rem .95rem 1.2rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--bg-card);
+  font-weight: 700;
+  font-size: .95rem;
+  box-shadow: var(--shadow-sm);
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px #e0e7ff;
+}
+.search-box input::placeholder { color: var(--ink-3); font-weight: 600; }
+
+/* ---------- شرائح التصفية ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: center;
+}
+.chip {
+  padding: .45rem 1.05rem;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--line);
+  background: var(--bg-card);
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--ink-2);
+  transition: all .2s var(--ease);
+  white-space: nowrap;
+}
+.chip:hover { border-color: #c7d2fe; color: var(--primary); transform: translateY(-1px); }
+.chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(79, 70, 229, .5);
+}
+.catalog-count {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+/* ---------- حالة لا نتائج ---------- */
+.catalog-empty {
+  max-width: 34rem;
+  margin: 2.2rem auto;
+  text-align: center;
+  padding: 2.4rem 1.6rem;
+  background: var(--bg-card);
+  border: 2px dashed var(--line-2);
+  border-radius: var(--r-lg);
+}
+.catalog-empty .e-ico { font-size: 2.6rem; margin-bottom: .6rem; }
+.catalog-empty .empty-q { color: var(--primary); font-weight: 800; }
+.catalog-empty .e-sub { color: var(--ink-2); font-size: .88rem; margin: .5rem 0 1.2rem; }
+.catalog-empty .btn { margin: 0 auto; }
+
+/* ---------- بانر الطلب المخصص ---------- */
+.custom-banner {
+  margin-top: 2.6rem;
+  padding: 1.8rem 2rem;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 55%, #1e1b4b 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+.custom-banner::before {
+  content: "\1F6E0\FE0F";
+  position: absolute;
+  left: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 8rem;
+  opacity: .08;
+  pointer-events: none;
+}
+.custom-banner .cb-t { font-size: 1.25rem; font-weight: 900; margin-bottom: .4rem; }
+.custom-banner .cb-s { color: #c7d2fe; font-size: .88rem; max-width: 34rem; }
+.custom-banner .cb-s b { color: #fff; }
+.custom-banner .btn-white { flex-shrink: 0; }
+
+/* ---------- صفحة الطلب المخصص ---------- */
+.custom-wrap {
+  padding: 2.2rem 0 4rem;
+  max-width: 46rem;
+}
+.custom-wrap .wizard-head { text-align: center; margin-bottom: 1.6rem; }
+.custom-wrap .wizard-head h1 { font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 900; }
+.custom-wrap .wizard-head p { color: var(--ink-2); max-width: 36rem; margin: .4rem auto 0; font-size: .95rem; }
+
+.custom-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .8rem;
+  margin-bottom: 1.6rem;
+}
+.c-step {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  padding: .9rem 1rem;
+  display: flex;
+  gap: .7rem;
+  align-items: flex-start;
+}
+.cs-num {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  color: var(--primary);
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  font-size: .95rem;
+}
+.c-step b { font-size: .86rem; font-weight: 800; display: block; }
+.c-step p { font-size: .76rem; color: var(--ink-3); font-weight: 600; line-height: 1.5; }
+
+/* ---------- شرائح العملة ---------- */
+.cur-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: .8rem;
+}
+.cur-chip {
+  padding: .4rem .95rem;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--line);
+  background: var(--bg-card);
+  font-size: .8rem;
+  font-weight: 800;
+  color: var(--ink-2);
+  transition: all .2s var(--ease);
+}
+.cur-chip:hover { border-color: #c7d2fe; color: var(--primary); }
+.cur-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(79, 70, 229, .5);
+}
+
+.amt-row {
+  display: flex;
+  align-items: stretch;
+  gap: .6rem;
+}
+.amt-row .cur-sym {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  flex-shrink: 0;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg-soft);
+  font-weight: 900;
+  font-size: 1.15rem;
+  color: var(--primary);
+}
+.amt-row .input { flex: 1; font-size: 1.2rem; font-weight: 800; }
+
+/* ---------- صندوق التسعير الحي ---------- */
+.custom-total {
+  margin-top: 1rem;
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 1rem 1.2rem;
+  box-shadow: var(--shadow-sm);
+}
+.ct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem 0;
+  font-size: .88rem;
+  border-bottom: 1px dashed var(--line);
+}
+.ct-row:last-child { border-bottom: none; }
+.ct-row span { color: var(--ink-2); font-weight: 700; }
+.ct-row b { font-weight: 800; font-variant-numeric: tabular-nums; }
+.ct-row.ct-total {
+  margin-top: .3rem;
+  padding: .7rem .8rem;
+  background: var(--bg-soft);
+  border-radius: var(--r-sm);
+  border-bottom: none;
+}
+.ct-row.ct-total span { color: var(--primary-deep); font-weight: 900; }
+.ct-row.ct-total b { color: var(--primary); font-size: 1.15rem; font-weight: 900; }
+
+/* ---------- تنبيه الحد الأدنى ---------- */
+.alert-warn {
+  margin-top: .8rem;
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+/* ---------- أسئلة الطلب المخصص ---------- */
+.custom-faq {
+  margin-top: 2rem;
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 1.4rem 1.6rem;
+}
+.custom-faq h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: .9rem; }
+.custom-faq details { border-bottom: 1px dashed var(--line); padding: .7rem 0; }
+.custom-faq details:last-child { border-bottom: none; }
+.custom-faq summary {
+  cursor: pointer;
+  font-weight: 800;
+  font-size: .92rem;
+  color: var(--ink);
+  list-style: none;
+  position: relative;
+  padding-left: 1.4rem;
+}
+.custom-faq summary::-webkit-details-marker { display: none; }
+.custom-faq summary::before {
+  content: "+";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.1rem;
+  height: 1.1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  color: var(--primary);
+  font-weight: 900;
+  font-size: .8rem;
+}
+.custom-faq details[open] summary::before { content: "\2212"; }
+.custom-faq details p { margin-top: .5rem; font-size: .85rem; color: var(--ink-2); line-height: 1.8; }
+
+/* ---------- استجابة الشاشات ---------- */
+@media (max-width: 860px) {
+  .custom-banner { flex-direction: column; text-align: center; }
+  .custom-banner .btn-white { margin: 0 auto; }
+}
+@media (max-width: 700px) {
+  .custom-steps { grid-template-columns: 1fr; }
+  .search-box input { padding: .85rem 3rem .85rem 1rem; }
+}

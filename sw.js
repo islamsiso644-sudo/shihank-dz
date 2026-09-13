@@ -3,11 +3,12 @@
    استراتيجية: Network-first للصفحات + Cache-first للأصول الثابتة
    ============================================================ */
 
-const CACHE = "shdz-v4";
+const CACHE = "shdz-v5";
 const CORE = [
   "index.html",
   "buy.html",
   "track.html",
+  "custom.html",
   "css/styles.css",
   "js/config.js",
   "js/data.js",
