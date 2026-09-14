@@ -892,21 +892,7 @@ const APPS = [
       { id: "pt25", name: "اشتراك 25$/شهر", sub: "لأي مبدع", price: 5000,  bonus: null },
     ],
   },
-  {
-    id: "giftapps",
-    name: "شحن أي تطبيق آخر",
-    alias: "بطاقات تطبيقات هدايا",
-    emoji: "📲",
-    sub: "بطاقات شرائية للتطبيقات",
-    tags: ["حسب الطلب"],
-    verifyType: "email",
-    verifyHint: "أدخل بريدك لإرسال رمز البطاقة عليه",
-    packs: [
-      { id: "ga10", name: "بطاقة 10$ (أي تطبيق)",  sub: "رمز فوري", price: 2350,  bonus: null },
-      { id: "ga25", name: "بطاقة 25$ (أي تطبيق)",  sub: "رمز فوري", price: 5700,  bonus: null },
-      { id: "ga50", name: "بطاقة 50$ (أي تطبيق)",  sub: "رمز فوري", price: 11200, bonus: null },
-    ],
-  },
+
 ];
 
 /* ---------- بطاقات ومحافظ الدفع الإلكتروني (شحن رصيد بالدولار يوصل على البريد) ---------- */
@@ -1016,6 +1002,21 @@ const WALLETS = [
       { id: "am10", name: "10 دولار",  sub: "رصيد فوري",   price: 2350,  bonus: null },
       { id: "am25", name: "25 دولار",  sub: "أفضل قيمة",   price: 5700,  bonus: "توفير 175" },
       { id: "am50", name: "50 دولار",  sub: "للمحترفين",   price: 11200, bonus: "توفير 550" },
+    ],
+  },
+  {
+    id: "bybit",
+    name: "Bybit",
+    alias: "باي بيت بايبيت بي بيت bybit شحن bybit رصيد bybit",
+    emoji: "🟡",
+    sub: "شحن محفظة Bybit بالدولار",
+    tags: ["خلال 30 دقيقة"],
+    verifyType: "email",
+    verifyHint: "أدخل بريد حسابك في Bybit لنضيف الرصيد إليه",
+    packs: [
+      { id: "by10",  name: "10 دولار",  sub: "فوري",   price: 2350,  bonus: null },
+      { id: "by25",  name: "25 دولار",  sub: "أفضل قيمة",   price: 5700,  bonus: "توفير 175" },
+      { id: "by50",  name: "50 دولار",  sub: "للمحترفين",   price: 11200, bonus: "توفير 550" },
     ],
   },
   {

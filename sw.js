@@ -3,7 +3,7 @@
    استراتيجية: Network-first للصفحات وملفات js/css (تضمن التحديث الفوري) + Cache-first للصور والـmanifest
    ============================================================ */
 
-const CACHE = "shdz-v6";
+const CACHE = "shdz-v7";
 const CORE = [
   "index.html",
   "buy.html",
